@@ -20,6 +20,12 @@ coverage.html
 *.swo
 *~
 
+# Secrets
+.envrc
+
+# Ideation notes
+IDEATION_CHAT*.md
+
 # macOS
 .DS_Store
 .AppleDouble
