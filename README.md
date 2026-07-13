@@ -31,14 +31,14 @@ WorkloadGuard monitors your system for excessive process spawning (common with A
 
 ## Features
 
-- **Dual-trigger monitoring**: Periodic checks (configurable interval) plus immediate checks when load exceeds threshold
-- **Process counting with parent filtering**: Target specific processes spawned by specific parents
-- **Policy-based rules**: Define multiple policies with different thresholds and actions
-- **Cedar policy engine**: Formal policy evaluation with composable rules
-- **Diagnostic capture**: Automatically captures `top`, `ps`, process trees, and stack samples before taking action
-- **Prometheus metrics**: Export metrics for monitoring and alerting
-- **macOS notifications**: Native notifications when policies trigger
-- **Graceful termination**: SIGTERM first, then SIGKILL after grace period
+- ⏱️ **Dual-trigger monitoring**: Periodic checks (configurable interval) plus immediate checks when load exceeds threshold
+- 🔍 **Process counting with parent filtering**: Target specific processes spawned by specific parents
+- 📋 **Policy-based rules**: Define multiple policies with different thresholds and actions
+- 🌲 **Cedar policy engine**: Formal policy evaluation with composable rules
+- 📸 **Diagnostic capture**: Automatically captures `top`, `ps`, process trees, and stack samples before taking action
+- 📈 **Prometheus metrics**: Export metrics for monitoring and alerting
+- 🔔 **macOS notifications**: Native notifications when policies trigger
+- 🛑 **Graceful termination**: SIGTERM first, then SIGKILL after grace period
 
 ## Installation
 
