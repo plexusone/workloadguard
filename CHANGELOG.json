@@ -9,7 +9,7 @@
     {
       "version": "v0.1.0",
       "date": "2026-07-13",
-      "commit": "cb5aa77",
+      "commit": "7504317",
       "highlights": [
         { "description": "macOS system health daemon that detects and mitigates runaway processes" },
         { "description": "Dual-trigger monitoring: periodic checks plus immediate checks when load exceeds threshold" },
@@ -55,6 +55,9 @@
       "infrastructure": [
         { "description": "GitHub Actions workflows for CI: build, lint, test, CodeQL SAST", "commit": "679bb62" },
         { "description": "Dependabot configuration for Go modules and GitHub Actions", "commit": "679bb62" }
+      ],
+      "fixed": [
+        { "description": "Use `cedar.EntityMap` instead of undefined `cedar.Entities` in policy engine", "commit": "7504317" }
       ]
     }
   ]

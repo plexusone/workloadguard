@@ -201,7 +201,7 @@ func (e *Engine) authorizeWithCedar(
 	})
 
 	decision, _ := e.policySet.IsAuthorized(
-		cedar.Entities{},
+		cedar.EntityMap{},
 		cedar.Request{
 			Principal: principal,
 			Action:    action,
