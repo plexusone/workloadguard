@@ -1,0 +1,81 @@
+# WorkloadGuard Configuration
+# Copy to ~/.config/workloadguard/config.toml
+
+# Periodic check interval (default: 60s)
+periodic_interval = "60s"
+
+# Load average polling interval for triggered checks (default: 5s)
+load_poll_interval = "5s"
+
+# 1-minute load average threshold for immediate checks (default: 400)
+load_threshold = 400.0
+
+# Log level: debug, info, warn, error (default: info)
+log_level = "info"
+
+# Path for diagnostic snapshots (optional)
+# diagnostics_path = "~/Library/Logs/workloadguard/diagnostics"
+
+# Dry run mode: log actions without executing (default: false)
+dry_run = false
+
+# Grace period after SIGTERM before SIGKILL (default: 3s)
+grace_period = "3s"
+
+# Cooldown between notifications for the same policy (default: 60s)
+cooldown = "60s"
+
+# -----------------------------------------------------------------------------
+# Policies
+# -----------------------------------------------------------------------------
+
+[policies.runaway-rg]
+# Detect runaway ripgrep processes (common with AI coding assistants)
+process = "rg"
+max_count = 30
+actions = ["log", "notify", "terminate"]
+priority = 100
+
+[policies.elevated-rg]
+# Detect elevated rg count during high load
+process = "rg"
+max_count = 10
+actions = ["log", "notify", "terminate"]
+priority = 90
+
+[policies.elevated-rg.conditions]
+min_load1 = 150.0
+
+[policies.runaway-git]
+# Detect runaway git processes
+process = "git"
+max_count = 50
+actions = ["log", "notify", "terminate"]
+priority = 80
+
+[policies.runaway-node]
+# Detect runaway Node.js processes (common with MCP servers)
+process = "node"
+max_count = 150
+actions = ["log", "notify"]
+priority = 70
+
+# Example: Detect runaway processes only from specific parents
+# [policies.claude-rg]
+# process = "rg"
+# max_count = 20
+# actions = ["log", "terminate"]
+# priority = 95
+#
+# [policies.claude-rg.conditions]
+# parent_process = "claude"
+
+# Example: Exclude processes from certain parents
+# [policies.rg-not-vscode]
+# process = "rg"
+# max_count = 30
+# actions = ["log", "terminate"]
+# priority = 85
+#
+# [policies.rg-not-vscode.conditions]
+# exclude_parents = ["Code Helper", "Cursor Helper"]
