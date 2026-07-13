@@ -1,0 +1,61 @@
+{
+  "irVersion": "1.0",
+  "project": "workloadguard",
+  "repository": "https://github.com/plexusone/workloadguard",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": ["plexusone"],
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "2026-07-13",
+      "commit": "cb5aa77",
+      "highlights": [
+        { "description": "macOS system health daemon that detects and mitigates runaway processes" },
+        { "description": "Dual-trigger monitoring: periodic checks plus immediate checks when load exceeds threshold" },
+        { "description": "Cedar policy engine for formal policy evaluation with composable rules" },
+        { "description": "Prometheus metrics for full observability" }
+      ],
+      "added": [
+        { "description": "TOML configuration with custom Duration type and policy definitions", "commit": "1c96341" },
+        { "description": "macOS libproc bindings via cgo for process enumeration (`proc_listpids`, `proc_pidinfo`, `proc_pidpath`)", "commit": "f104ff3" },
+        { "description": "macOS sysctl bindings for load average, CPU count, and memory metrics", "commit": "f104ff3" },
+        { "description": "Structured logging utilities with slog integration", "commit": "a8f5685" },
+        { "description": "System snapshot collection with parent name resolution", "commit": "0aacaac" },
+        { "description": "Cedar-based policy engine with priority-ordered evaluation", "commit": "a974795" },
+        { "description": "Parent process filtering: `parent_process` and `exclude_parents` conditions", "commit": "a974795" },
+        { "description": "Diagnostic snapshot capture: top, ps, process tree, stack samples", "commit": "d863fef" },
+        { "description": "Prometheus metrics endpoint with custom registry", "commit": "4b83d60" },
+        { "description": "System metrics: load average (1m, 5m, 15m), CPU count, memory total/free", "commit": "4b83d60" },
+        { "description": "Process metrics: total count, count by name", "commit": "4b83d60" },
+        { "description": "Policy metrics: evaluations, triggers, actions by policy", "commit": "4b83d60" },
+        { "description": "Termination metrics: SIGTERM and SIGKILL counts by policy and process", "commit": "4b83d60" },
+        { "description": "Dual-trigger monitoring daemon: periodic timer + load threshold trigger", "commit": "d176f1f" },
+        { "description": "Cooldown tracking to prevent notification storms", "commit": "d176f1f" },
+        { "description": "Graceful termination: SIGTERM first, then SIGKILL after grace period", "commit": "d176f1f" },
+        { "description": "Application orchestration layer for CLI integration", "commit": "0cd48da" },
+        { "description": "Cobra CLI with `run`, `check`, `validate`, `version` commands", "commit": "90dc693" },
+        { "description": "CLI flags: `--dry-run`, `--metrics`, `--metrics-addr`, `--config`, `--verbose`", "commit": "90dc693" },
+        { "description": "JSON and text output formats for `check` command", "commit": "90dc693" }
+      ],
+      "tests": [
+        { "description": "Comprehensive unit tests for config, logging, collector, policy, daemon, diagnostics, and metrics packages", "commit": "0084847" }
+      ],
+      "documentation": [
+        { "description": "README with installation, configuration, CLI reference, metrics, diagnostics, and architecture", "commit": "eac52db" },
+        { "description": "Release notes for v0.1.0", "commit": "cb5aa77" }
+      ],
+      "build": [
+        { "description": "Go module initialization with cedar-go, go-toml/v2, prometheus, cobra dependencies", "commit": "87a2d10" },
+        { "description": "golangci-lint configuration", "commit": "87a2d10" },
+        { "description": "Makefile with build, test, lint, install, and launchd targets", "commit": "6370039" },
+        { "description": "Example configuration and launchd plist", "commit": "6370039" },
+        { "description": "MIT License", "commit": "6370039" }
+      ],
+      "infrastructure": [
+        { "description": "GitHub Actions workflows for CI: build, lint, test, CodeQL SAST", "commit": "679bb62" },
+        { "description": "Dependabot configuration for Go modules and GitHub Actions", "commit": "679bb62" }
+      ]
+    }
+  ]
+}
