@@ -3,7 +3,7 @@ module github.com/plexusone/workloadguard
 go 1.25.0
 
 require (
-	github.com/cedar-policy/cedar-go v0.4.0
+	github.com/cedar-policy/cedar-go v1.8.0
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/prometheus/client_golang v1.22.0
 	github.com/spf13/cobra v1.10.2
