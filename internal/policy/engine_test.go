@@ -59,10 +59,10 @@ func TestEvaluate(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		snapshot       *collector.Snapshot
-		wantTriggered  map[string]bool
-		wantPIDCounts  map[string]int
+		name          string
+		snapshot      *collector.Snapshot
+		wantTriggered map[string]bool
+		wantPIDCounts map[string]int
 	}{
 		{
 			name: "no processes",

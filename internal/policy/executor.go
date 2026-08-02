@@ -70,8 +70,9 @@ func (e *Executor) Execute(
 	return nil
 }
 
+//nolint:unparam // error return for interface consistency
 func (e *Executor) executeLog(
-	ctx context.Context,
+	_ context.Context,
 	decision Decision,
 	snapshot *collector.Snapshot,
 ) error {
@@ -123,7 +124,7 @@ func (e *Executor) executeNotify(ctx context.Context, decision Decision) error {
 func (e *Executor) executeTerminate(
 	ctx context.Context,
 	decision Decision,
-	snapshot *collector.Snapshot,
+	_ *collector.Snapshot,
 ) error {
 	if len(decision.PIDs) == 0 {
 		return nil
@@ -200,7 +201,7 @@ func (e *Executor) executeTerminate(
 func (e *Executor) executeDiagnose(
 	ctx context.Context,
 	decision Decision,
-	snapshot *collector.Snapshot,
+	_ *collector.Snapshot,
 ) error {
 	if e.config.DiagnosticsPath == "" {
 		return nil
@@ -222,28 +223,26 @@ func (e *Executor) executeDiagnose(
 	// Capture top output.
 	topFile := filepath.Join(dir, "top.txt")
 	if output, err := exec.CommandContext(ctx, "top", "-l", "1").Output(); err == nil {
-		_ = os.WriteFile(topFile, output, 0o644)
+		_ = os.WriteFile(topFile, output, 0o600)
 	}
 
 	// Capture ps output.
 	psFile := filepath.Join(dir, "ps.txt")
 	if output, err := exec.CommandContext(ctx, "ps", "-axo", "user,pid,ppid,%cpu,%mem,command").Output(); err == nil {
-		_ = os.WriteFile(psFile, output, 0o644)
+		_ = os.WriteFile(psFile, output, 0o600)
 	}
 
 	return nil
 }
 
+//nolint:unparam // error return for interface consistency
 func (e *Executor) executeSample(ctx context.Context, decision Decision) error {
 	if len(decision.PIDs) == 0 {
 		return nil
 	}
 
 	// Sample the first few PIDs.
-	maxSamples := 3
-	if len(decision.PIDs) < maxSamples {
-		maxSamples = len(decision.PIDs)
-	}
+	maxSamples := min(3, len(decision.PIDs))
 
 	for i := 0; i < maxSamples; i++ {
 		pid := decision.PIDs[i]
@@ -254,6 +253,7 @@ func (e *Executor) executeSample(ctx context.Context, decision Decision) error {
 		)
 
 		// Run sample command (non-blocking, output to logger).
+		//nolint:gosec // safe: pid is an integer, not user input
 		cmd := exec.CommandContext(ctx, "sample", fmt.Sprintf("%d", pid), "5")
 		if output, err := cmd.Output(); err == nil {
 			e.logger.Debug("sample output",
@@ -266,6 +266,7 @@ func (e *Executor) executeSample(ctx context.Context, decision Decision) error {
 	return nil
 }
 
+//nolint:unparam // error return for interface consistency
 func (e *Executor) executeSpindump(ctx context.Context, decision Decision) error {
 	if len(decision.PIDs) == 0 {
 		return nil
@@ -279,6 +280,7 @@ func (e *Executor) executeSpindump(ctx context.Context, decision Decision) error
 		"pid", pid,
 	)
 
+	//nolint:gosec // safe: pid is an integer, not user input
 	cmd := exec.CommandContext(ctx, "spindump", fmt.Sprintf("%d", pid))
 	if output, err := cmd.Output(); err == nil {
 		e.logger.Debug("spindump output",

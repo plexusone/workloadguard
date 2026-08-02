@@ -81,10 +81,7 @@ func (c *Collector) Capture(ctx context.Context, pids []int, snapshot *collector
 	}
 
 	// Sample first few processes.
-	sampledFiles, err := c.captureSamples(ctx, dir, pids, 3)
-	if err != nil {
-		c.logger.Warn("capture samples failed", "error", err)
-	}
+	sampledFiles := c.captureSamples(ctx, dir, pids, 3)
 	ds.Files = append(ds.Files, sampledFiles...)
 
 	return ds, nil
@@ -101,7 +98,7 @@ func (c *Collector) captureTop(ctx context.Context, dir string) (string, error) 
 		return "", err
 	}
 
-	if err := os.WriteFile(file, output, 0o644); err != nil {
+	if err := os.WriteFile(file, output, 0o600); err != nil {
 		return "", err
 	}
 
@@ -121,7 +118,7 @@ func (c *Collector) capturePS(ctx context.Context, dir string) (string, error) {
 		return "", err
 	}
 
-	if err := os.WriteFile(file, output, 0o644); err != nil {
+	if err := os.WriteFile(file, output, 0o600); err != nil {
 		return "", err
 	}
 
@@ -129,7 +126,7 @@ func (c *Collector) capturePS(ctx context.Context, dir string) (string, error) {
 }
 
 func (c *Collector) captureProcessTree(
-	ctx context.Context,
+	_ context.Context,
 	dir string,
 	pids []int,
 	snapshot *collector.Snapshot,
@@ -173,7 +170,7 @@ func (c *Collector) captureProcessTree(
 		fmt.Fprintf(&sb, "  %s: %d children\n", name, count)
 	}
 
-	if err := os.WriteFile(file, []byte(sb.String()), 0o644); err != nil {
+	if err := os.WriteFile(file, []byte(sb.String()), 0o600); err != nil {
 		return "", err
 	}
 
@@ -204,9 +201,9 @@ func (c *Collector) buildParentChain(pid int, snapshot *collector.Snapshot) []co
 	return chain
 }
 
-func (c *Collector) captureSamples(ctx context.Context, dir string, pids []int, maxSamples int) ([]string, error) {
+func (c *Collector) captureSamples(ctx context.Context, dir string, pids []int, maxSamples int) []string {
 	if len(pids) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	if maxSamples > len(pids) {
@@ -220,6 +217,7 @@ func (c *Collector) captureSamples(ctx context.Context, dir string, pids []int, 
 		file := filepath.Join(dir, fmt.Sprintf("sample_%d.txt", pid))
 
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		//nolint:gosec // safe: pid is an integer, not user input
 		output, err := exec.CommandContext(ctx, "sample", strconv.Itoa(pid), "3").Output()
 		cancel()
 
@@ -228,14 +226,14 @@ func (c *Collector) captureSamples(ctx context.Context, dir string, pids []int, 
 			continue
 		}
 
-		if err := os.WriteFile(file, output, 0o644); err != nil {
+		if err := os.WriteFile(file, output, 0o600); err != nil {
 			continue
 		}
 
 		files = append(files, file)
 	}
 
-	return files, nil
+	return files
 }
 
 // CaptureSpindump captures a spindump for a process.
@@ -245,12 +243,13 @@ func (c *Collector) CaptureSpindump(ctx context.Context, dir string, pid int) (s
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
+	//nolint:gosec // safe: pid is an integer, not user input
 	output, err := exec.CommandContext(ctx, "spindump", strconv.Itoa(pid), "3").Output()
 	if err != nil {
 		return "", err
 	}
 
-	if err := os.WriteFile(file, output, 0o644); err != nil {
+	if err := os.WriteFile(file, output, 0o600); err != nil {
 		return "", err
 	}
 

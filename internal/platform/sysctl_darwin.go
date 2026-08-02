@@ -44,9 +44,9 @@ func GetLoadAverage() (*LoadAverage, error) {
 	// Try to read fscale from the right location.
 	// ARM64 has 4 bytes padding after the 3 uint32s.
 	if len(data) >= 24 {
-		fscale = int64(binary.LittleEndian.Uint64(data[16:24]))
+		fscale = int64(binary.LittleEndian.Uint64(data[16:24])) //nolint:gosec // safe: fscale is never negative in kernel data
 	} else if len(data) >= 20 {
-		fscale = int64(binary.LittleEndian.Uint64(data[12:20]))
+		fscale = int64(binary.LittleEndian.Uint64(data[12:20])) //nolint:gosec // safe: fscale is never negative in kernel data
 	}
 
 	if fscale == 0 {
@@ -129,4 +129,3 @@ func getVMStat(name string) (uint64, error) {
 	val := binary.LittleEndian.Uint32(data)
 	return uint64(val), nil
 }
-

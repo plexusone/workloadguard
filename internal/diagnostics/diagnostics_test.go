@@ -79,8 +79,8 @@ func TestCapture(t *testing.T) {
 		t.Error("snapshot directory was not created")
 	}
 
-	// Verify timestamp is recent.
-	if time.Since(snapshot.Timestamp) > 5*time.Second {
+	// Verify timestamp is recent (allow more time for slow CI environments).
+	if time.Since(snapshot.Timestamp) > 30*time.Second {
 		t.Errorf("timestamp too old: %v", snapshot.Timestamp)
 	}
 

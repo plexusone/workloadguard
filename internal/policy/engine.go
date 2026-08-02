@@ -178,8 +178,8 @@ func (e *Engine) evaluatePolicy(
 }
 
 func (e *Engine) authorizeWithCedar(
-	ctx context.Context,
-	policyName string,
+	_ context.Context,
+	_ string,
 	policy config.Policy,
 	snapshot *collector.Snapshot,
 	count int,
