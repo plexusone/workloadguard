@@ -33,3 +33,6 @@ IDEATION_CHAT*.md
 
 # Build
 dist/
+
+# MkDocs
+site/
