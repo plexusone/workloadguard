@@ -37,6 +37,7 @@ WorkloadGuard monitors your system for excessive process spawning (common with A
 - 🌲 **Cedar policy engine**: Formal policy evaluation with composable rules
 - 📸 **Diagnostic capture**: Automatically captures `top`, `ps`, process trees, and stack samples before taking action
 - 📈 **Prometheus metrics**: Export metrics for monitoring and alerting
+- 🌐 **JSON API & WebSocket**: Remote status, policy, and process visibility with real-time updates
 - 🔔 **macOS notifications**: Native notifications when policies trigger
 - 🛑 **Graceful termination**: SIGTERM first, then SIGKILL after grace period
 
@@ -257,6 +258,52 @@ workloadguard version    Print version information
 --execute           Execute actions for triggered policies
 -o, --output string Output format: json, text (default: "json")
 ```
+
+## JSON API
+
+Running with `--api` starts a JSON API and WebSocket server for remote monitoring and control. It shares the same `--addr` (default `:9090`) as `--metrics`, so both can be enabled on one server:
+
+```bash
+workloadguard run --api --metrics --addr :9090
+```
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/status` | Current load, memory, CPU, process count, and per-policy state |
+| GET | `/api/policies` | All policies with their current evaluation state |
+| GET | `/api/policies/{name}` | A single policy's state |
+| GET | `/api/processes` | All processes, grouped by name |
+| GET | `/api/processes/{name}` | Processes matching a given name |
+| POST | `/api/terminate` | Terminate specific PIDs |
+| GET | `/api/ws` | WebSocket stream of status/alert/terminated events |
+| GET | `/health` | Liveness check (always registered when `--metrics` or `--api` is enabled) |
+
+### Terminate a process
+
+```bash
+curl -X POST http://localhost:9090/api/terminate \
+  -H 'Content-Type: application/json' \
+  -d '{"pids": [12345], "policy_name": "manual", "force": false}'
+```
+
+`force: true` sends `SIGKILL` directly instead of `SIGTERM`. Only PIDs present in the current snapshot are accepted; in `dry_run` config mode, terminate requests are validated but not executed. Responses look like:
+
+```json
+{"terminated": [12345], "failed": [], "message": "processes terminated"}
+```
+
+### WebSocket
+
+Connect to `ws://localhost:9090/api/ws` to receive JSON messages as the daemon runs:
+
+```json
+{"type": "status", "data": { "...": "StatusResponse" }}
+{"type": "terminated", "data": {"pids": [12345], "policy": "manual"}}
+```
+
+Status updates broadcast every 2 seconds while at least one client is connected.
 
 ## Metrics
 
