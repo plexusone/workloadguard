@@ -291,3 +291,37 @@ func (e *Executor) executeSpindump(ctx context.Context, decision Decision) error
 
 	return nil
 }
+
+// Term sends SIGTERM to a process.
+func (e *Executor) Term(pid int) error {
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return fmt.Errorf("find process %d: %w", pid, err)
+	}
+
+	if err := proc.Signal(syscall.SIGTERM); err != nil {
+		if errors.Is(err, os.ErrProcessDone) || errors.Is(err, syscall.ESRCH) {
+			return nil // Process already gone
+		}
+		return fmt.Errorf("sigterm %d: %w", pid, err)
+	}
+
+	return nil
+}
+
+// Kill sends SIGKILL to a process.
+func (e *Executor) Kill(pid int) error {
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return fmt.Errorf("find process %d: %w", pid, err)
+	}
+
+	if err := proc.Signal(syscall.SIGKILL); err != nil {
+		if errors.Is(err, os.ErrProcessDone) || errors.Is(err, syscall.ESRCH) {
+			return nil // Process already gone
+		}
+		return fmt.Errorf("sigkill %d: %w", pid, err)
+	}
+
+	return nil
+}

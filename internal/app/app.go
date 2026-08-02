@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net/http"
 	"time"
 
+	"github.com/plexusone/workloadguard/internal/api"
 	"github.com/plexusone/workloadguard/internal/collector"
 	"github.com/plexusone/workloadguard/internal/config"
 	"github.com/plexusone/workloadguard/internal/daemon"
@@ -23,6 +25,8 @@ type RunOptions struct {
 	Metrics       *metrics.Metrics
 	MetricsAddr   string
 	EnableMetrics bool
+	EnableAPI     bool
+	APIAddr       string
 }
 
 // Run starts the workloadguard daemon.
@@ -36,8 +40,65 @@ func Run(ctx context.Context, opts RunOptions) error {
 		d.SetMetrics(opts.Metrics)
 	}
 
-	// Start metrics server if enabled.
-	if opts.EnableMetrics && opts.MetricsAddr != "" {
+	// Start HTTP server for metrics and/or API.
+	if (opts.EnableMetrics || opts.EnableAPI) && opts.APIAddr != "" {
+		mux := http.NewServeMux()
+
+		// Add metrics endpoint if enabled.
+		if opts.EnableMetrics && opts.Metrics != nil {
+			mux.Handle("/metrics", opts.Metrics.Handler())
+			mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("ok\n"))
+			})
+		}
+
+		// Add API endpoints if enabled.
+		var apiServer *api.Server
+		if opts.EnableAPI {
+			apiServer = api.NewServer(d, opts.Logger)
+			apiServer.RegisterRoutes(mux)
+			opts.Logger.Info("API server enabled", "addr", opts.APIAddr)
+		}
+
+		server := &http.Server{
+			Addr:              opts.APIAddr,
+			Handler:           mux,
+			ReadHeaderTimeout: 10 * time.Second,
+		}
+
+		go func() {
+			opts.Logger.Info("starting HTTP server", "addr", opts.APIAddr)
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				opts.Logger.Error("HTTP server failed", "error", err)
+			}
+		}()
+
+		defer func() {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := server.Shutdown(shutdownCtx); err != nil {
+				opts.Logger.Warn("HTTP server shutdown failed", "error", err)
+			}
+		}()
+
+		// Broadcast status updates periodically when API is enabled.
+		if apiServer != nil {
+			go func() {
+				ticker := time.NewTicker(2 * time.Second)
+				defer ticker.Stop()
+				for {
+					select {
+					case <-ctx.Done():
+						return
+					case <-ticker.C:
+						apiServer.BroadcastStatus()
+					}
+				}
+			}()
+		}
+	} else if opts.EnableMetrics && opts.MetricsAddr != "" {
+		// Legacy: metrics-only server on separate address.
 		server := metrics.NewServer(opts.MetricsAddr, opts.Metrics, opts.Logger)
 		go func() {
 			if err := server.Start(); err != nil {

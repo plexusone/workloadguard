@@ -31,6 +31,11 @@ type Daemon struct {
 	// Tracks last trigger time per policy for cooldown.
 	lastTrigger   map[string]time.Time
 	lastTriggerMu sync.RWMutex
+
+	// Latest snapshot and decisions for API access.
+	latestSnapshot  *collector.Snapshot
+	latestDecisions []policy.Decision
+	latestMu        sync.RWMutex
 }
 
 // New creates a new Daemon.
@@ -139,6 +144,12 @@ func (d *Daemon) runCheck(ctx context.Context, trigger string) {
 	}
 
 	decisions := d.engine.Evaluate(ctx, snapshot)
+
+	// Store latest state for API access.
+	d.latestMu.Lock()
+	d.latestSnapshot = snapshot
+	d.latestDecisions = decisions
+	d.latestMu.Unlock()
 
 	for _, decision := range decisions {
 		if d.metrics != nil {
@@ -265,4 +276,50 @@ func (d *Daemon) Config() *config.Config {
 // Engine returns the policy engine (for testing).
 func (d *Daemon) Engine() *policy.Engine {
 	return d.engine
+}
+
+// Snapshot returns the most recent system snapshot.
+func (d *Daemon) Snapshot() *collector.Snapshot {
+	d.latestMu.RLock()
+	defer d.latestMu.RUnlock()
+	return d.latestSnapshot
+}
+
+// Decisions returns the most recent policy decisions.
+func (d *Daemon) Decisions() []policy.Decision {
+	d.latestMu.RLock()
+	defer d.latestMu.RUnlock()
+	return d.latestDecisions
+}
+
+// IsOnCooldown returns whether a policy is on cooldown.
+func (d *Daemon) IsOnCooldown(policyName string) bool {
+	return d.isOnCooldown(policyName)
+}
+
+// Terminate terminates the given PIDs.
+func (d *Daemon) Terminate(ctx context.Context, pids []int, force bool) (terminated, failed []int) {
+	terminated = make([]int, 0, len(pids))
+	failed = make([]int, 0)
+
+	for _, pid := range pids {
+		var err error
+		if force {
+			err = d.executor.Kill(pid)
+		} else {
+			err = d.executor.Term(pid)
+		}
+
+		if err != nil {
+			d.logger.Warn("terminate failed", "pid", pid, "error", err)
+			failed = append(failed, pid)
+		} else {
+			terminated = append(terminated, pid)
+			if d.metrics != nil {
+				d.metrics.RecordTermination("api", "process", force)
+			}
+		}
+	}
+
+	return terminated, failed
 }

@@ -34,6 +34,8 @@ var (
 	dryRun        bool
 	enableMetrics bool
 	metricsAddr   string
+	enableAPI     bool
+	apiAddr       string
 )
 
 func init() {
@@ -53,7 +55,19 @@ func init() {
 		&metricsAddr,
 		"metrics-addr",
 		":9090",
-		"metrics server address",
+		"metrics server address (deprecated: use --api-addr)",
+	)
+	runCmd.Flags().BoolVar(
+		&enableAPI,
+		"api",
+		false,
+		"enable JSON API server",
+	)
+	runCmd.Flags().StringVar(
+		&apiAddr,
+		"api-addr",
+		":9090",
+		"API server address",
 	)
 
 	rootCmd.AddCommand(runCmd)
@@ -83,6 +97,8 @@ func runDaemon(cmd *cobra.Command, args []string) error {
 		Logger:        logger,
 		EnableMetrics: enableMetrics,
 		MetricsAddr:   metricsAddr,
+		EnableAPI:     enableAPI,
+		APIAddr:       apiAddr,
 	}
 
 	if enableMetrics {
