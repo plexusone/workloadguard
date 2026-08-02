@@ -7,6 +7,49 @@
   "maintainers": ["plexusone"],
   "releases": [
     {
+      "version": "v0.2.0",
+      "date": "2026-08-02",
+      "commit": "16711af",
+      "highlights": [
+        { "description": "JSON API & WebSocket server for remote status, policy, and process visibility with real-time updates" },
+        { "description": "Single --addr flag replaces --metrics-addr/--api-addr, unifying HTTP server configuration" },
+        { "description": "CI restricted to macos-latest to match the module's darwin-only build constraints" }
+      ],
+      "breaking": [
+        { "description": "Removed --metrics-addr and --api-addr; use --addr for both --metrics and --api", "commit": "6df6054" }
+      ],
+      "added": [
+        { "description": "JSON API server: GET /api/status, /api/policies, /api/policies/{name}, /api/processes, /api/processes/{name}, POST /api/terminate", "commit": "7f5314c" },
+        { "description": "WebSocket endpoint (GET /api/ws) broadcasting status updates and termination events", "commit": "7f5314c" },
+        { "description": "--api flag to enable the JSON API server", "commit": "7f5314c" },
+        { "description": "Daemon Snapshot/Decisions/IsOnCooldown accessors and a Terminate method backing the API", "commit": "7f5314c" },
+        { "description": "Executor.Term/Kill helpers for direct SIGTERM/SIGKILL by PID", "commit": "7f5314c" },
+        { "description": "/health liveness endpoint, now registered whenever --metrics or --api is enabled", "commit": "6df6054" }
+      ],
+      "changed": [
+        { "description": "--metrics and --api now share a single http.Server and ServeMux instead of a dedicated metrics-only server", "commit": "6df6054" }
+      ],
+      "fixed": [
+        { "description": "Restrict diagnostic and config file writes to 0600 permissions", "commit": "b7f19f0" },
+        { "description": "Suppress gosec false positives on integer-derived exec args with justification comments", "commit": "b7f19f0" },
+        { "description": "Drop unused error return from captureSamples", "commit": "b7f19f0" },
+        { "description": "Widen the diagnostics timestamp test tolerance to reduce flakes on slow CI runners", "commit": "b7f19f0" }
+      ],
+      "dependencies": [
+        { "description": "Add github.com/gorilla/websocket for the WebSocket API", "commit": "bde3eeb" },
+        { "description": "Bump github.com/prometheus/client_golang from 1.23.2 to 1.24.1", "commit": "9768add" }
+      ],
+      "build": [
+        { "description": "Restrict Go CI, Lint, and SAST workflows to macos-latest", "commit": "6d29f62" }
+      ],
+      "documentation": [
+        { "description": "UI PRD, TRD, PLAN, and ROADMAP specs for the JSON API/WebSocket/TUI work", "commit": "f4ec2ab" },
+        { "description": "JSON API section in the README", "commit": "33d777c" },
+        { "description": "MkDocs Material documentation site scaffolded under docs/", "commit": "16711af" },
+        { "description": "v0.2.0 release notes", "commit": "16711af" }
+      ]
+    },
+    {
       "version": "v0.1.0",
       "date": "2026-07-13",
       "commit": "7504317",
