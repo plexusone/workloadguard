@@ -1,0 +1,59 @@
+site_name: WorkloadGuard
+site_description: A macOS system health daemon that detects and mitigates runaway processes
+site_url: https://plexusone.dev/workloadguard/
+repo_url: https://github.com/plexusone/workloadguard
+repo_name: plexusone/workloadguard
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Guides:
+      - Configuration: guides/configuration.md
+      - Command Line Interface: guides/cli.md
+      - JSON API: guides/api.md
+      - Metrics: guides/metrics.md
+      - Diagnostics: guides/diagnostics.md
+      - Architecture: guides/architecture.md
+  - Release Notes:
+      - v0.2.0: releases/v0.2.0.md
+      - v0.1.0: releases/v0.1.0.md
+  - Changelog: https://github.com/plexusone/workloadguard/blob/main/CHANGELOG.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/plexusone/workloadguard
