@@ -107,7 +107,13 @@ workloadguard run
 With Prometheus metrics:
 
 ```bash
-workloadguard run --metrics --metrics-addr :9090
+workloadguard run --metrics --addr :9090
+```
+
+With the JSON API and WebSocket server:
+
+```bash
+workloadguard run --api --addr :9090
 ```
 
 ## Configuration
@@ -239,9 +245,10 @@ workloadguard version    Print version information
 ### Run Flags
 
 ```
---dry-run              Log actions without executing
---metrics              Enable Prometheus metrics endpoint
---metrics-addr string  Metrics server address (default: ":9090")
+--dry-run       Log actions without executing
+--metrics       Enable Prometheus metrics endpoint
+--api           Enable JSON API server
+--addr string   HTTP server address for --metrics and/or --api (default: ":9090")
 ```
 
 ### Check Flags

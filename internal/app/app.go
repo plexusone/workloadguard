@@ -23,10 +23,9 @@ type RunOptions struct {
 	Config        *config.Config
 	Logger        *slog.Logger
 	Metrics       *metrics.Metrics
-	MetricsAddr   string
 	EnableMetrics bool
 	EnableAPI     bool
-	APIAddr       string
+	Addr          string
 }
 
 // Run starts the workloadguard daemon.
@@ -41,34 +40,32 @@ func Run(ctx context.Context, opts RunOptions) error {
 	}
 
 	// Start HTTP server for metrics and/or API.
-	if (opts.EnableMetrics || opts.EnableAPI) && opts.APIAddr != "" {
+	if (opts.EnableMetrics || opts.EnableAPI) && opts.Addr != "" {
 		mux := http.NewServeMux()
+		mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("ok\n"))
+		})
 
-		// Add metrics endpoint if enabled.
 		if opts.EnableMetrics && opts.Metrics != nil {
 			mux.Handle("/metrics", opts.Metrics.Handler())
-			mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(http.StatusOK)
-				_, _ = w.Write([]byte("ok\n"))
-			})
 		}
 
-		// Add API endpoints if enabled.
 		var apiServer *api.Server
 		if opts.EnableAPI {
 			apiServer = api.NewServer(d, opts.Logger)
 			apiServer.RegisterRoutes(mux)
-			opts.Logger.Info("API server enabled", "addr", opts.APIAddr)
+			opts.Logger.Info("API server enabled", "addr", opts.Addr)
 		}
 
 		server := &http.Server{
-			Addr:              opts.APIAddr,
+			Addr:              opts.Addr,
 			Handler:           mux,
 			ReadHeaderTimeout: 10 * time.Second,
 		}
 
 		go func() {
-			opts.Logger.Info("starting HTTP server", "addr", opts.APIAddr)
+			opts.Logger.Info("starting HTTP server", "addr", opts.Addr)
 			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 				opts.Logger.Error("HTTP server failed", "error", err)
 			}
@@ -97,19 +94,6 @@ func Run(ctx context.Context, opts RunOptions) error {
 				}
 			}()
 		}
-	} else if opts.EnableMetrics && opts.MetricsAddr != "" {
-		// Legacy: metrics-only server on separate address.
-		server := metrics.NewServer(opts.MetricsAddr, opts.Metrics, opts.Logger)
-		go func() {
-			if err := server.Start(); err != nil {
-				opts.Logger.Error("metrics server failed", "error", err)
-			}
-		}()
-		defer func() {
-			if err := server.Shutdown(ctx); err != nil {
-				opts.Logger.Warn("metrics server shutdown failed", "error", err)
-			}
-		}()
 	}
 
 	opts.Logger.Info("starting workloadguard",

@@ -2,8 +2,6 @@
 package metrics
 
 import (
-	"context"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -248,45 +246,4 @@ func (m *Metrics) RecordTermination(policy, process string, sigkill bool) {
 	} else {
 		m.ProcessesTerminated.WithLabelValues(policy, process).Inc()
 	}
-}
-
-// Server runs the metrics HTTP server.
-type Server struct {
-	addr    string
-	metrics *Metrics
-	logger  *slog.Logger
-	server  *http.Server
-}
-
-// NewServer creates a new metrics server.
-func NewServer(addr string, metrics *Metrics, logger *slog.Logger) *Server {
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", metrics.Handler())
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok\n"))
-	})
-
-	return &Server{
-		addr:    addr,
-		metrics: metrics,
-		logger:  logger,
-		server: &http.Server{
-			Addr:         addr,
-			Handler:      mux,
-			ReadTimeout:  5 * time.Second,
-			WriteTimeout: 10 * time.Second,
-		},
-	}
-}
-
-// Start starts the metrics server.
-func (s *Server) Start() error {
-	s.logger.Info("starting metrics server", "addr", s.addr)
-	return s.server.ListenAndServe()
-}
-
-// Shutdown gracefully shuts down the metrics server.
-func (s *Server) Shutdown(ctx context.Context) error {
-	return s.server.Shutdown(ctx)
 }

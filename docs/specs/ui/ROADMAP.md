@@ -28,7 +28,7 @@
 ```bash
 # New flags
 workloadguard run --api              # Enable API server
-workloadguard run --api-addr :9090   # Custom API address
+workloadguard run --addr :9090       # Custom server address (shared with --metrics)
 
 # New commands
 workloadguard top                    # Interactive TUI

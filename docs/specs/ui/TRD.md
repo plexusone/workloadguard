@@ -421,7 +421,7 @@ func Handler() http.Handler {
 
 1. **Localhost Only**: API binds to `127.0.0.1` by default
 2. **No Auth for Local**: Localhost access requires no authentication
-3. **Optional Remote**: `--api-addr 0.0.0.0:9090 --api-token <token>` for remote
+3. **Optional Remote**: `--addr 0.0.0.0:9090 --api-token <token>` for remote
 4. **Terminate Validation**: Only PIDs from current snapshot can be terminated
 5. **Rate Limiting**: Max 10 terminate requests per minute
 

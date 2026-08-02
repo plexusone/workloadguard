@@ -1,15 +1,12 @@
 package metrics
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/plexusone/workloadguard/internal/logging"
 )
 
 func TestNew(t *testing.T) {
@@ -126,71 +123,5 @@ func TestHandler(t *testing.T) {
 		if !strings.Contains(bodyStr, metric) {
 			t.Errorf("expected metric %q in output", metric)
 		}
-	}
-}
-
-func TestServerHealthEndpoint(t *testing.T) {
-	m := New()
-	logger := logging.NewDiscard()
-
-	server := NewServer(":0", m, logger)
-
-	// Test health endpoint directly.
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", m.Handler())
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok\n"))
-	})
-
-	req := httptest.NewRequest(http.MethodGet, "/health", nil)
-	rec := httptest.NewRecorder()
-
-	mux.ServeHTTP(rec, req)
-
-	if rec.Code != http.StatusOK {
-		t.Errorf("expected status 200, got %d", rec.Code)
-	}
-
-	body := rec.Body.String()
-	if !strings.Contains(body, "ok") {
-		t.Errorf("expected 'ok' in response, got %q", body)
-	}
-
-	_ = server // Use variable.
-}
-
-func TestServerStartShutdown(t *testing.T) {
-	m := New()
-	logger := logging.NewDiscard()
-
-	// Use port 0 for automatic port assignment.
-	server := NewServer("127.0.0.1:0", m, logger)
-
-	// Start server in goroutine.
-	errCh := make(chan error, 1)
-	go func() {
-		errCh <- server.Start()
-	}()
-
-	// Give server time to start.
-	time.Sleep(50 * time.Millisecond)
-
-	// Shutdown.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		t.Errorf("Shutdown() error = %v", err)
-	}
-
-	// Server should have stopped.
-	select {
-	case err := <-errCh:
-		if err != http.ErrServerClosed {
-			t.Errorf("Start() error = %v, want http.ErrServerClosed", err)
-		}
-	case <-time.After(time.Second):
-		t.Error("server did not stop")
 	}
 }

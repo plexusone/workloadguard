@@ -33,9 +33,8 @@ sudden load spikes between periodic checks.`,
 var (
 	dryRun        bool
 	enableMetrics bool
-	metricsAddr   string
 	enableAPI     bool
-	apiAddr       string
+	addr          string
 )
 
 func init() {
@@ -51,12 +50,6 @@ func init() {
 		false,
 		"enable Prometheus metrics endpoint",
 	)
-	runCmd.Flags().StringVar(
-		&metricsAddr,
-		"metrics-addr",
-		":9090",
-		"metrics server address (deprecated: use --api-addr)",
-	)
 	runCmd.Flags().BoolVar(
 		&enableAPI,
 		"api",
@@ -64,10 +57,10 @@ func init() {
 		"enable JSON API server",
 	)
 	runCmd.Flags().StringVar(
-		&apiAddr,
-		"api-addr",
+		&addr,
+		"addr",
 		":9090",
-		"API server address",
+		"HTTP server address for --metrics and/or --api",
 	)
 
 	rootCmd.AddCommand(runCmd)
@@ -96,9 +89,8 @@ func runDaemon(cmd *cobra.Command, args []string) error {
 		Config:        cfg,
 		Logger:        logger,
 		EnableMetrics: enableMetrics,
-		MetricsAddr:   metricsAddr,
 		EnableAPI:     enableAPI,
-		APIAddr:       apiAddr,
+		Addr:          addr,
 	}
 
 	if enableMetrics {
