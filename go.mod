@@ -3,7 +3,7 @@ module github.com/plexusone/workloadguard
 go 1.26.0
 
 require (
-	github.com/cedar-policy/cedar-go v1.8.0
+	github.com/cedar-policy/cedar-go v1.9.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/prometheus/client_golang v1.25.0
@@ -14,6 +14,7 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260820222146-c27c302e5fc3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
